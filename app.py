@@ -1,13 +1,21 @@
 import streamlit as st
 import pandas as pd
+import os
 
 DATA_FILE = "samples.csv"
 
+st.write("**Debug:** Current working directory:", os.getcwd())
+st.write("**Debug:** Files here:", os.listdir())
+
+# Try load or create file
 try:
     df = pd.read_csv(DATA_FILE)
-except:
+    st.write(f"**Debug:** Loaded {DATA_FILE} with {len(df)} rows.")
+except Exception as e:
+    st.write(f"**Debug:** Failed to read {DATA_FILE}: {e}")
     df = pd.DataFrame(columns=["Sample ID", "Mouse ID", "Tissue Type", "Status"])
     df.to_csv(DATA_FILE, index=False)
+    st.write(f"**Debug:** Created new {DATA_FILE}.")
 
 st.title("🧪 Lab Sample Tracker")
 
