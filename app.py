@@ -19,26 +19,11 @@ st.header("Add New Sample")
 with st.form("sample_form"):
     sample_id = st.text_input("Sample ID")
     mouse_id = st.text_input("Mouse ID")
-    
+
     tissue = st.selectbox("Tissue Type", [
-        "Adipose Tissue",
-        "Blood",
-        "Bone",
-        "Brain",
-        "Cerebrospinal Fluid",
-        "Heart",
-        "Kidney",
-        "Liver",
-        "Lung",
-        "Muscle",
-        "Pancreas",
-        "Peripheral Nerve",
-        "Retina",
-        "Skin",
-        "Spinal Cord",
-        "Spleen",
-        "Thymus",
-        "Other"
+        "Adipose Tissue", "Blood", "Bone", "Brain", "Cerebrospinal Fluid", "Heart", "Kidney",
+        "Liver", "Lung", "Muscle", "Pancreas", "Peripheral Nerve", "Retina",
+        "Skin", "Spinal Cord", "Spleen", "Thymus", "Other"
     ])
     
     status = st.selectbox("Status", ["Collected", "Stored", "Analyzed"])
@@ -55,18 +40,28 @@ with st.form("sample_form"):
             st.error("❌ Please enter both Sample ID and Mouse ID.")
 
 # -----------------------
-# Display Sample Table
+# Search + Filter Section
 # -----------------------
-st.header("📋 All Samples")
-st.dataframe(df)
+st.header("🔍 Search & Filter Samples")
+
+search = st.text_input("Search Sample or Mouse ID")
+filtered_df = df[
+    df["Sample ID"].str.contains(search, case=False, na=False) |
+    df["Mouse ID"].str.contains(search, case=False, na=False)
+] if search else df
+
+status_filter = st.selectbox("Filter by status", ["All"] + df["Status"].unique().tolist())
+if status_filter != "All":
+    filtered_df = filtered_df[filtered_df["Status"] == status_filter]
+
+st.dataframe(filtered_df)
 
 # -----------------------
-# Filter Section
+# CSV Download
 # -----------------------
-st.header("🔍 Filter Samples")
-if not df.empty:
-    selected_status = st.selectbox("Filter by status", ["All"] + df["Status"].unique().tolist())
-    if selected_status != "All":
-        st.dataframe(df[df["Status"] == selected_status])
-else:
-    st.info("No samples to display yet.")
+st.download_button(
+    label="📥 Download Filtered CSV",
+    data=filtered_df.to_csv(index=False),
+    file_name="filtered_samples.csv",
+    mime="text/csv"
+)
